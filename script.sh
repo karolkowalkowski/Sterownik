@@ -15,6 +15,9 @@ gpio write 25 1
 gpio write 28 1
 gpio write 29 1
 
+#zmienna do podtrzymania grzania pieca o 2stopnie jak już sie włączy...
+piecWlaczony=0
+
 #stan 0/1/2/3/4/5/6
 # 0 - nic nie wlaczac
 # 1 - podtrzymanie
@@ -101,14 +104,57 @@ else
 	s="0"
 fi
 
+pokojFloat=$t4
+pokojInteger=${pokojFloat%.*}
+
+naDworzeFloat=$t2
+naDworzeInteger=${naDworzeFloat%.*}
+
 #gpio write...
 if [ $s = "1" ]
 then
 	echo "stan podtrzymania wlaczony"
-	#tymczasowo
-	gpio write 25 1
-	gpio write 28 1
-	gpio write 29 1
+	if [ $naDworzeInteger -lt 1 ] ## [[ "$supportLeft" -lt 1 ] || [ "$yearCompare" -gt 0 ]] -> mniejsze od 1 większe od 0
+	then
+		echo "jest zimniej niz 0"
+		if [ $pokojInteger -lt 3 ]
+		then
+			piecWlaczony=1
+			gpio write 25 1
+			gpio write 28 0 #wlaczamy piec duzy
+			gpio write 29 1
+			echo "wlaczamy piec bo jest zimniej w domu niz 3 stopnie"
+		elif [ $pokojInteger -gt 5 ]
+		then
+			echo "wylaczamy piec bo jest cieplej w domu niz 5 stopni"
+			piecWlaczony=0
+			gpio write 25 1
+			gpio write 28 1 #wylaczamy piec duzy
+			gpio write 29 1
+		else
+			if [ $piecWlaczony = "0" ]
+			then
+				echo "jest okolo 4 stopni, ale nie bylo zimniej"
+				gpio write 25 1
+				gpio write 28 1 #wylaczamy piec duzy
+				gpio write 29 1
+			else
+				echo "piec chodzi, bo bylo zimniej niz 3 stponie - dlatego czekamy jeszcze do podgrzania"
+				gpio write 25 1
+				gpio write 28 0 #podtrzymujemy wlaczenie pieca duzego
+				gpio write 29 1
+			fi
+			
+		fi
+	else
+		piecWlaczony=0
+		gpio write 25 1
+		gpio write 28 1
+		gpio write 29 1
+		echo "jest cieplej niz 0"
+		#wylaczamy wiec wszystko
+	fi
+	
 elif [ $s = "2" ]
 then 
 	echo "stan maly piec wlaczony"
@@ -150,5 +196,8 @@ else
 	gpio write 28 1
 	gpio write 29 1
 fi
+#sleep 10
+#60 sekund razy 60 min = 1h
+#sleep $[20]
 sleep 1200
 done
