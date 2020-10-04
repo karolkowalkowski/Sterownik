@@ -18,6 +18,10 @@ gpio write 29 1
 #zmienna do podtrzymania grzania pieca o 2stopnie jak już sie włączy...
 piecWlaczony=0
 
+#stan piecow:
+p1=0 #piec maly
+p2=0 #piec duzy
+
 #stan 0/1/2/3/4/5/6
 # 0 - nic nie wlaczac
 # 1 - podtrzymanie
@@ -27,7 +31,7 @@ piecWlaczony=0
 # 5 - stan używany tylko na początku
 # 6	- podlewanie
 
-sleep 120
+sleep 120 #czekamy aż wstanie modem po wlaczeniu
 
 #stan początkowy
 s="5" 
@@ -37,15 +41,6 @@ while true; do
 echo
 echo $(date)
 echo
-#piec maly
-#if [test $(gpio read 25)=1]
-#then
-#	echo "piec maly wylaczony" 
-#	p1="O"
-#else
-#	echo "piec maly wlaczony"
-#	p1="1"
-#fi
 
 t1=$(head /mnt/1wire/28.98B8A7271901/temperature)
 echo "temperatura u chłopakow t1 ="$t1
@@ -60,19 +55,29 @@ echo "temperatura pokoj pln t4 = "$t4
 t5=$(head /mnt/1wire/28.5E3DE42F1901/temperature)
 echo "temperatura salon t5 = "$t5
 
-#piec duzy
-#if [test $(gpio read 28)=1]
-#then
-#	echo "piec duzy wylaczony" 
-#	p2="O"
-#else
-#	echo "piec duzy wlaczony"
-#	p2="1"
-#fi
+#stan wyjscia na piec maly
+stanPiecaMalego=$(gpio read 25) 
+if [ $stanPiecaMalego = "1" ]
+then
+	echo "piec maly wylaczony" 
+	p1="O"
+else
+	echo "piec maly wlaczony"
+	p1="1"
+fi
 
-#p1="$p1"&p2="$p2"&
+#stan wyjscia na piec duzy
+stanPiecaDuzego=$(gpio read 28) 
+if [ $stanPiecaDuzego = "1" ]
+then
+	echo "piec duzy wylaczony" 
+	p2=0
+else
+	echo "piec duzy wlaczony"
+	p2=1
+fi
 
-url="http://kkowalkowski.nstrefa.pl/arduino/index.php?t1="$t1"&t2="$t2"&t3="$t3"&t4="$t4"&t5="$t5"&s="$s"&z2=d3u129d83u12d3981u129d83u12d38u"
+url="http://kkowalkowski.nstrefa.pl/arduino/index.php?t1="$t1"&t2="$t2"&t3="$t3"&t4="$t4"&t5="$t5"&s="$s"&p1="$p1"&p2="$p2"&z2=d3u129d83u12d3981u129d83u12d38u"
 echo $url
 content=$(curl -s -X GET "$url")
 if [ $content = "arduino403" ]
@@ -158,23 +163,27 @@ then
 elif [ $s = "2" ]
 then 
 	echo "stan maly piec wlaczony"
+	piecWlaczony=0
 	gpio write 25 0
 	gpio write 28 1
 	gpio write 29 1
 elif [ $s = "3" ]
 then 
 	echo "stan duzy piec wlaczony"
+	piecWlaczony=0
 	gpio write 25 1
 	gpio write 28 0
 	gpio write 29 1
 elif [ $s = "4" ]
 then 
+	piecWlaczony=0
 	echo "stan oba piece wlaczony"
 	gpio write 25 0
 	gpio write 28 0
 	gpio write 29 1
 elif [ $s = "6" ]
 then 
+	piecWlaczony=0
 	echo "stan podlewanie wlaczony"
 	gpio write 25 1
 	gpio write 28 1
@@ -186,11 +195,13 @@ then
 	gpio write 29 1
 elif [ $s = "0" ]
 then 
+	piecWlaczony=0
 	echo "stan wylaczenie systemu wlaczony"
 	gpio write 25 1
 	gpio write 28 1
 	gpio write 29 1
 else
+	piecWlaczony=0
 	echo "else"
 	gpio write 25 1
 	gpio write 28 1
@@ -198,6 +209,6 @@ else
 fi
 #sleep 10
 #60 sekund razy 60 min = 1h
-#sleep $[20]
+#sleep $[15]
 sleep 1200
 done
