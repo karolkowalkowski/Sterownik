@@ -31,8 +31,6 @@ p2=0 #piec duzy
 # 5 - stan używany tylko na początku
 # 6	- podlewanie
 
-sleep 120 #czekamy aż wstanie modem po wlaczeniu
-
 #stan początkowy
 s="5" 
 
@@ -76,6 +74,8 @@ else
 	echo "piec duzy wlaczony"
 	p2=1
 fi
+
+sleep 120 #czekamy aż wstanie modem po wlaczeniu
 
 url="http://kkowalkowski.nstrefa.pl/arduino/index.php?t1="$t1"&t2="$t2"&t3="$t3"&t4="$t4"&t5="$t5"&s="$s"&p1="$p1"&p2="$p2"&z2=d3u129d83u12d3981u129d83u12d38u"
 echo $url
