@@ -122,16 +122,16 @@ then
 	if [ $naDworzeInteger -lt 1 ] ## [[ "$supportLeft" -lt 1 ] || [ "$yearCompare" -gt 0 ]] -> mniejsze od 1 większe od 0
 	then
 		echo "jest zimniej niz 0"
-		if [ $pokojInteger -lt 3 ]
+		if [ $pokojInteger -lt 4 ]
 		then
 			piecWlaczony=1
 			gpio write 25 1
 			gpio write 28 0 #wlaczamy piec duzy
 			gpio write 29 1
-			echo "wlaczamy piec bo jest zimniej w domu niz 3 stopnie"
+			echo "wlaczamy piec bo jest zimniej w domu niz 4 stopnie"
 		elif [ $pokojInteger -gt 5 ]
 		then
-			echo "wylaczamy piec bo jest cieplej w domu niz 5 stopni"
+			echo "wylaczamy piec bo jest cieplej w domu niz 6 stopni"
 			piecWlaczony=0
 			gpio write 25 1
 			gpio write 28 1 #wylaczamy piec duzy
@@ -139,12 +139,12 @@ then
 		else
 			if [ $piecWlaczony = "0" ]
 			then
-				echo "jest okolo 4 stopni, ale nie bylo zimniej"
+				echo "jest okolo 5 stopni, ale nie bylo zimniej"
 				gpio write 25 1
 				gpio write 28 1 #wylaczamy piec duzy
 				gpio write 29 1
 			else
-				echo "piec chodzi, bo bylo zimniej niz 3 stponie - dlatego czekamy jeszcze do podgrzania"
+				echo "piec chodzi, bo bylo zimniej niz 4 stponie - dlatego czekamy jeszcze do podgrzania"
 				gpio write 25 1
 				gpio write 28 0 #podtrzymujemy wlaczenie pieca duzego
 				gpio write 29 1
@@ -210,5 +210,5 @@ fi
 #sleep 10
 #60 sekund razy 60 min = 1h
 #sleep $[15]
-sleep 1200
+sleep 1080
 done
