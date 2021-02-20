@@ -104,6 +104,11 @@ elif [ $content = "arduino603" ]
 then
 	echo "podlewanie"
 	s="6"
+elif [ $content = "arduino903" ]
+then
+	echo "reboot"
+	s="0"
+	reboot
 else
 	echo "nie odebrane"
 	s="0"
@@ -196,7 +201,7 @@ then
 elif [ $s = "0" ]
 then 
 	piecWlaczony=0
-	echo "stan wylaczenie systemu wlaczony"
+	echo "stan wylaczenie systemu 0 wlaczony"
 	gpio write 25 1
 	gpio write 28 1
 	gpio write 29 1
